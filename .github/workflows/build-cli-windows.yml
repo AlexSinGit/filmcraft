@@ -1,0 +1,33 @@
+# Manual x64 Windows build of the headless CLI / MCP server, uploaded as a workflow artifact.
+name: Build CLI (Windows)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      # stable satisfies the workspace rust-version (1.95)
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: rustc -V
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cli-windows
+
+      - name: Build
+        run: cargo build --release --locked -p filmcraft-cli
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: filmcraft-cli-windows-x64
+          path: target/release/filmcraft-cli.exe
+          if-no-files-found: error
